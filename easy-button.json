@@ -20,7 +20,7 @@
             }
         }, 
         "SKU_capacity": {
-            "type": "int",
+            "type": "string",
             "defaultValue": "2",
             "allowedValues": [
                 "2",
