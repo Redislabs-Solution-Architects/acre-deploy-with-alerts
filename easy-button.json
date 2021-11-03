@@ -28,7 +28,6 @@
         },
         "tags": {
             "type": "map(string)",
-            "defaultValue": "",
             "metadata": {
                 "description":"Key/value tags to assign to all resources."
             }
