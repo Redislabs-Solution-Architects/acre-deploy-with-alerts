@@ -6,30 +6,27 @@
             "type": "string",
             "defaultValue": "Enterprise_E10",
             "allowedValues": [
-                "Enterprise_E10",
-                "EnterpriseFlash_F1500",
-                "EnterpriseFlash_F300",
-                "EnterpriseFlash_F700",
-                "Enterprise_E10",
-                "Enterprise_E100",
-                "Enterprise_E20",
-                "Enterprise_E50"
+                "Enterprise_E10_2",
+                "EnterpriseFlash_F1500_3",
+                "EnterpriseFlash_F300_3",
+                "EnterpriseFlash_F700_3",
+                "Enterprise_E10_2",
+                "Enterprise_E100_2",
+                "Enterprise_E20_2",
+                "Enterprise_E50_2",
+                "Enterprise_E10_4",
+                "EnterpriseFlash_F1500_6",
+                "EnterpriseFlash_F300_6",
+                "EnterpriseFlash_F700_6",
+                "Enterprise_E10_4",
+                "Enterprise_E100_4",
+                "Enterprise_E20_4",
+                "Enterprise_E50_4"
             ],
             "metadata": {
                 "description": "Select the SKU of the Redis cluster."
             }
         }, 
-        "SKU_capacity": {
-            "type": "int",
-            "defaultValue": 2,
-            "allowedValues": [
-                2,
-                3
-            ],
-            "metadata": {
-                "description": "Select the SKU of the Redis cluster."
-            }
-        },
         "resourceTags": {
             "type": "object",
             "defaultValue": {
@@ -61,8 +58,8 @@
     "variables": {
         "redis_enterprise_name": "[parameters('name')]",
         "zones": ["1","2","3"],
-        "sku_name": "[parameters('SKU_Name')]",
-        "sku_capacity": "[parameters('SKU_Capacity')]",
+        "sku_name": "[split(parameters('SKU'), '_')[0]]",
+        "sku_capacity": "[split(parameters('SKU'), '_')[1]]",
         "minimum_tls_version": "[parameters('minimumTlsVersion')]",
         "location": "[resourceGroup().location]"
     },
