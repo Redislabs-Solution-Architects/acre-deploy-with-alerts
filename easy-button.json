@@ -1,0 +1,109 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "acre_sku": {
+            "type": "string",
+            "defaultValue": "Enterprise_E10-2",
+            "allowedValues": [
+                "Enterprise_E10-2"
+            ],
+            "metadata": {
+                "description": "Select the SKU of the SQL pool."
+            }
+        },
+        "azure_redis_enterprise_database_clustering_policy": {
+            "type": "string",
+            "defaultValue": "EnterpriseCluster",
+            "metadata": {
+                "description": "Specifies which cluster policy to use"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "East-US",
+            "metadata": {
+                "description": "Azure Region - East-US only for now"
+            }
+            
+        }, 
+        "cloudName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description":"The Azure cloud environment to use. Available values at https://www.terraform.io/docs/providers/azurerm/#environment"
+            }
+        },
+        "tags": {
+            "type": "map(string)",
+            "defaultValue": "",
+            "metadata": {
+                "description":"Key/value tags to assign to all resources."
+            }
+        },
+        "redis_enterprise_name": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Name of the Redis Cache."
+            }
+        },
+        "redis_enterprise_cluster_id": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Cluster Id."
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "storageAccountName": "[concat('st', uniqueString(resourceGroup().id))]",
+        "keyVaultName": "[concat('kv-', uniqueString(resourceGroup().id))]",
+        "keyVault": "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "redisEnterpriseName": "[parameters('redis_enterprise_name']",
+        "zones": [1,2,3],
+        "sku_name": "[parameters('acre_sku')]",
+        "tags": "[concat(parameters('tags'), azurerm_client_config.current.client_id]",
+        "resource_group_name": "[concat('rg-', uniqueString(resourceGroup().id))]",
+        "cluster_id": "[parameters('redis_enterprise_cluster_id')]",
+        "clustering_policy": "[parameters('azure_redis_enterprise_database_clustering_policy')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Cache/redis",
+            "name": "[variables('redisEnterpriseName')]",
+            "apiVersion": "2020-12-01",
+            "location": "[variables('location')]",
+            "tags": {
+                "displayName": "Redis Cache"
+            },
+            "properties": {
+                "sku": {
+                    "name": "Basic",
+                    "family": "C",
+                    "capacity": 2
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.KeyVault/vaults/secrets",
+                    "name": "[concat(variables('keyVaultName'), '/FEAST-ONLINE-STORE-CONN')]",
+                    "apiVersion": "2019-09-01",
+                    "location": "[resourceGroup().location]",
+                    "properties": {
+                        "value": "[concat(variables('redisEnterpriseName'),'.redis.cache.windows.net:6380,password=',listKeys(concat('Microsoft.Cache/redis/', variables('redisEnterpriseName')), providers('Microsoft.Cache', 'Redis').apiVersions[0]).primaryKey, ',ssl=True')]"
+                    },
+                    "dependsOn": [
+                        "[variables('keyVault')]",
+                        "[variables('redisCache')]"
+                    ]
+                }
+            ]
+        }
+    ],
+    "outputs": {
+
+    }
+}
