@@ -20,11 +20,11 @@
             }
         }, 
         "SKU_capacity": {
-            "type": "string",
-            "defaultValue": "2",
+            "type": "int",
+            "defaultValue": 2,
             "allowedValues": [
-                "2",
-                "3"
+                2,
+                3
             ],
             "metadata": {
                 "description": "Select the SKU of the Redis cluster."
