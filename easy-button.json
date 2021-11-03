@@ -20,7 +20,7 @@
             }
         }, 
         "SKU_capacity": {
-            "type": "string",
+            "type": "int",
             "defaultValue": "2",
             "allowedValues": [
                 "2",
@@ -60,7 +60,7 @@
     "functions": [],
     "variables": {
         "redis_enterprise_name": "[parameters('name')]",
-        "zones": "1,2,3",
+        "zones": ["1","2","3"],
         "sku_name": "[parameters('SKU_Name')]",
         "sku_capacity": "[parameters('SKU_Capacity')]",
         "minimum_tls_version": "[parameters('minimumTlsVersion')]",
