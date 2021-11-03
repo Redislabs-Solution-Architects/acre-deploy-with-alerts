@@ -2,16 +2,34 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "SKU": {
+        "SKU_name": {
             "type": "string",
-            "defaultValue": "Enterprise_E10-2",
+            "defaultValue": "Enterprise_E10",
             "allowedValues": [
-                "Enterprise_E10-2"
+                "Enterprise_E10",
+                "EnterpriseFlash_F1500",
+                "EnterpriseFlash_F300",
+                "EnterpriseFlash_F700",
+                "Enterprise_E10",
+                "Enterprise_E100",
+                "Enterprise_E20",
+                "Enterprise_E50"
             ],
             "metadata": {
                 "description": "Select the SKU of the Redis cluster."
             }
         }, 
+        "SKU_capacity": {
+            "type": "string",
+            "defaultValue": "2",
+            "allowedValues": [
+                "2",
+                "3"
+            ],
+            "metadata": {
+                "description": "Select the SKU of the Redis cluster."
+            }
+        },
         "resourceTags": {
             "type": "object",
             "defaultValue": {
@@ -28,10 +46,11 @@
         },
         "minimumTlsVersion": {
             "type": "string",
-            "defaultValue": "2",
+            "defaultValue": "1.2",
             "allowedValues": [
-                "2",
-                "3"
+                "1.0",
+                "1.1",
+                "1.2"
             ],
             "metadata": {
                 "description": "Cluster Id for enterprise cluster."
@@ -40,11 +59,11 @@
     },
     "functions": [],
     "variables": {
-        "redis_enterprise_name": "[parameters('name']",
+        "redis_enterprise_name": "[parameters('name')]",
         "zones": "1,2,3",
-        "sku_name": "[split(parameters('sku'),'_')][0]",
-        "sku_capacity": "[split(parameters('sku'),'_')[1]]",
-        "minimum_tls_version": "[concat('rg-', uniqueString(resourceGroup().id))]",
+        "sku_name": "[parameters('SKU_Name')]",
+        "sku_capacity": "[parameters('SKU_Capacity')]",
+        "minimum_tls_version": "[parameters('minimumTlsVersion')]",
         "location": "[resourceGroup().location]"
     },
     "resources": [
@@ -53,7 +72,7 @@
             "apiVersion": "2021-08-01",
             "name": "[variables('redis_enterprise_name')]",
             "location": "[variables('location')]",
-            "tags": "[parameters('resourceTags')]", ,
+            "tags": "[parameters('resourceTags')]",
             "sku": {
               "capacity": "[variables('sku_capacity')]",
               "name": "[variables('sku_name')]"
