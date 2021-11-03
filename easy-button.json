@@ -9,27 +9,14 @@
                 "Enterprise_E10-2"
             ],
             "metadata": {
-                "description": "Select the SKU of the SQL pool."
-            }
-        },
-        "enterpriseClusteringPolicy": {
-            "type": "string",
-            "defaultValue": "EnterpriseCluster",
-            "metadata": {
-                "description": "Specifies which cluster policy to use"
+                "description": "Select the SKU of the Redis cluster."
             }
         }, 
-        "cloudName": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description":"The Azure cloud environment to use. Available values at https://www.terraform.io/docs/providers/azurerm/#environment"
-            }
-        },
-        "tags": {
-            "type": "map(string)",
-            "metadata": {
-                "description":"Key/value tags to assign to all resources."
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+              "tag name 1": "<value 1>",
+              "tag name 2": "<value 2>"
             }
         },
         "name": {
@@ -39,60 +26,43 @@
                 "description": "Name of the Redis Cache."
             }
         },
-        "clusterId": {
+        "minimumTlsVersion": {
             "type": "string",
-            "defaultValue": "",
+            "defaultValue": "2",
+            "allowedValues": [
+                "2",
+                "3"
+            ],
             "metadata": {
-                "description": "Cluster Id."
+                "description": "Cluster Id for enterprise cluster."
             }
         }
     },
     "functions": [],
     "variables": {
-        "location": "[resourceGroup().location]",
-        "storageAccountName": "[concat('st', uniqueString(resourceGroup().id))]",
-        "keyVaultName": "[concat('kv-', uniqueString(resourceGroup().id))]",
-        "keyVault": "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
-        "redisEnterpriseName": "[parameters('name']",
-        "zones": [1,2,3],
-        "sku_name": "[parameters('sku')]",
-        "tags": "[concat(parameters('tags'), uniqueString(resourceGroup().id)]",
-        "resource_group_name": "[concat('rg-', uniqueString(resourceGroup().id))]",
-        "cluster_id": "[parameters('clusterId')]",
-        "clustering_policy": "[parameters('enterpriseClusteringPolicy')]"
+        "redis_enterprise_name": "[parameters('name']",
+        "zones": "1,2,3",
+        "sku_name": "[split(parameters('sku'),'_')][0]",
+        "sku_capacity": "[split(parameters('sku'),'_')[1]]",
+        "minimum_tls_version": "[concat('rg-', uniqueString(resourceGroup().id))]",
+        "location": "[resourceGroup().location]"
     },
     "resources": [
         {
-            "type": "Microsoft.Cache/redis",
-            "name": "[variables('redisEnterpriseName')]",
-            "apiVersion": "2020-12-01",
+            "type": "Microsoft.Cache/redisEnterprise",
+            "apiVersion": "2021-08-01",
+            "name": "[variables('redis_enterprise_name')]",
             "location": "[variables('location')]",
-            "tags": {
-                "displayName": "Redis Cache"
+            "tags": "[parameters('resourceTags')]", ,
+            "sku": {
+              "capacity": "[variables('sku_capacity')]",
+              "name": "[variables('sku_name')]"
             },
             "properties": {
-                "sku": {
-                    "name": "Basic",
-                    "family": "C",
-                    "capacity": 2
-                }
+              "minimumTlsVersion": "[variables('minimum_tls_version')]"
             },
-            "resources": [
-                {
-                    "type": "Microsoft.KeyVault/vaults/secrets",
-                    "name": "[concat(variables('keyVaultName'), '/FEAST-ONLINE-STORE-CONN')]",
-                    "apiVersion": "2019-09-01",
-                    "location": "[resourceGroup().location]",
-                    "properties": {
-                        "value": "[concat(variables('redisEnterpriseName'),'.redis.cache.windows.net:6380,password=',listKeys(concat('Microsoft.Cache/redis/', variables('redisEnterpriseName')), providers('Microsoft.Cache', 'Redis').apiVersions[0]).primaryKey, ',ssl=True')]"
-                    },
-                    "dependsOn": [
-                        "[variables('keyVault')]",
-                        "[variables('redisCache')]"
-                    ]
-                }
-            ]
-        }
+            "zones": [ "[variables('zones')]" ]
+          }
     ],
     "outputs": {
 
