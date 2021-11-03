@@ -58,8 +58,8 @@
     "variables": {
         "redis_enterprise_name": "[parameters('name')]",
         "zones": ["1","2","3"],
-        "sku_name": "[split(parameters('SKU'), '_')[0]]",
-        "sku_capacity": "[split(parameters('SKU'), '_')[1]]",
+        "sku_name": "[concat(split(parameters('SKU'), '_')[0], split(parameters('SKU'), '_')[1])]",
+        "sku_capacity": "[split(parameters('SKU'), '_')[2]]",
         "minimum_tls_version": "[parameters('minimumTlsVersion')]",
         "location": "[resourceGroup().location]"
     },
