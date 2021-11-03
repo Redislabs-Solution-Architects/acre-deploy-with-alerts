@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "acre_sku": {
+        "SKU": {
             "type": "string",
             "defaultValue": "Enterprise_E10-2",
             "allowedValues": [
@@ -12,20 +12,12 @@
                 "description": "Select the SKU of the SQL pool."
             }
         },
-        "azure_redis_enterprise_database_clustering_policy": {
+        "enterpriseClusteringPolicy": {
             "type": "string",
             "defaultValue": "EnterpriseCluster",
             "metadata": {
                 "description": "Specifies which cluster policy to use"
             }
-        },
-        "location": {
-            "type": "string",
-            "defaultValue": "East-US",
-            "metadata": {
-                "description": "Azure Region - East-US only for now"
-            }
-            
         }, 
         "cloudName": {
             "type": "string",
@@ -41,14 +33,14 @@
                 "description":"Key/value tags to assign to all resources."
             }
         },
-        "redis_enterprise_name": {
+        "name": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
                 "description": "Name of the Redis Cache."
             }
         },
-        "redis_enterprise_cluster_id": {
+        "clusterId": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
@@ -62,13 +54,13 @@
         "storageAccountName": "[concat('st', uniqueString(resourceGroup().id))]",
         "keyVaultName": "[concat('kv-', uniqueString(resourceGroup().id))]",
         "keyVault": "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
-        "redisEnterpriseName": "[parameters('redis_enterprise_name']",
+        "redisEnterpriseName": "[parameters('name']",
         "zones": [1,2,3],
-        "sku_name": "[parameters('acre_sku')]",
-        "tags": "[concat(parameters('tags'), azurerm_client_config.current.client_id]",
+        "sku_name": "[parameters('sku')]",
+        "tags": "[concat(parameters('tags'), uniqueString(resourceGroup().id)]",
         "resource_group_name": "[concat('rg-', uniqueString(resourceGroup().id))]",
-        "cluster_id": "[parameters('redis_enterprise_cluster_id')]",
-        "clustering_policy": "[parameters('azure_redis_enterprise_database_clustering_policy')]"
+        "cluster_id": "[parameters('clusterId')]",
+        "clustering_policy": "[parameters('enterpriseClusteringPolicy')]"
     },
     "resources": [
         {
