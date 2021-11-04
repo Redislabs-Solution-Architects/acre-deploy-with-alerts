@@ -30,8 +30,8 @@
         "resourceTags": {
             "type": "object",
             "defaultValue": {
-              "tag name 1": "<value 1>",
-              "tag name 2": "<value 2>"
+              "tag name 1": "value 1",
+              "tag name 2": "value 2"
             }
         },
         "name": {
@@ -58,7 +58,7 @@
     "variables": {
         "redis_enterprise_name": "[parameters('name')]",
         "zones": ["1","2","3"],
-        "sku_name": "[concat(split(parameters('SKU'), '_')[0], split(parameters('SKU'), '_')[1])]",
+        "sku_name": "[concat(split(parameters('SKU'), '_')[0], '_', split(parameters('SKU'), '_')[1])]",
         "sku_capacity": "[split(parameters('SKU'), '_')[2]]",
         "minimum_tls_version": "[parameters('minimumTlsVersion')]",
         "location": "[resourceGroup().location]"
