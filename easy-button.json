@@ -27,13 +27,6 @@
                 "description": "Select the SKU of the Redis cluster."
             }
         }, 
-        "resourceTags": {
-            "type": "object",
-            "defaultValue": {
-              "tag name 1": "value 1",
-              "tag name 2": "value 2"
-            }
-        },
         "name": {
             "type": "string",
             "defaultValue": "",
@@ -69,7 +62,6 @@
             "apiVersion": "2021-08-01",
             "name": "[variables('redis_enterprise_name')]",
             "location": "[variables('location')]",
-            "tags": "[parameters('resourceTags')]",
             "sku": {
               "capacity": "[variables('sku_capacity')]",
               "name": "[variables('sku_name')]"
