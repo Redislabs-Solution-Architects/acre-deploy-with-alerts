@@ -83,7 +83,7 @@
         {
             "type": "microsoft.insights/metricAlerts",
             "apiVersion": "2018-03-01",
-            "name": "Critical Alerts - Static",
+            "name": "CriticalAlerts-Static",
             "location": "global",
             "properties": {
                 "severity": 0,
