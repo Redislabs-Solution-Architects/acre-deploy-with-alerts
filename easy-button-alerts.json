@@ -83,13 +83,13 @@
         {
             "type": "microsoft.insights/metricAlerts",
             "apiVersion": "2018-03-01",
-            "name": "CriticalAlerts-Static",
+            "name": "Critical Alerts - Static",
             "location": "global",
             "properties": {
                 "severity": 0,
                 "enabled": true,
                 "scopes": [
-                    "[variables('scopeId')]"
+                    "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Cache/redisEnterprise/',variables('redis_enterprise_name'),'/databases/default')]"
                 ],
                 "evaluationFrequency": "PT1M",
                 "windowSize": "PT5M",
