@@ -14,7 +14,7 @@
     "variables": {},
     "resources": [
         {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.Insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "[parameters('metricAlerts_Total_Ops___Dynamic_name')]",
             "location": "global",

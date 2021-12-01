@@ -81,7 +81,7 @@
             "zones": "[variables('zones')]"
         },
         {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.Insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "Critical Alerts - Static",
             "location": "global",
@@ -140,7 +140,7 @@
             }
         },
         {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.Insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "Cache Writes - Dynamic",
             "location": "global",
@@ -176,7 +176,7 @@
             }
         },
         {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.Insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "Cache Reads - Dynamic",
             "location": "global",
@@ -212,7 +212,7 @@
             }
         },
         {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.Insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "Cache Misses - Dynamic",
             "location": "global",
@@ -248,7 +248,7 @@
             }
         },
          {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.Insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "Cache Hits - Dynamic",
             "location": "global",
@@ -284,7 +284,7 @@
             }
         },
         {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.Insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "Total Ops Dynamic",
             "location": "global",
