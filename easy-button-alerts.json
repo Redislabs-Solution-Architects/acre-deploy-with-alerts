@@ -1,0 +1,326 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SKU": {
+            "type": "string",
+            "defaultValue": "Enterprise_E10_2",
+            "allowedValues": [
+                "Enterprise_E10_2",
+                "EnterpriseFlash_F1500_3",
+                "EnterpriseFlash_F300_3",
+                "EnterpriseFlash_F700_3",
+                "Enterprise_E10_2",
+                "Enterprise_E100_2",
+                "Enterprise_E20_2",
+                "Enterprise_E50_2",
+                "Enterprise_E10_4",
+                "EnterpriseFlash_F1500_6",
+                "EnterpriseFlash_F300_6",
+                "EnterpriseFlash_F700_6",
+                "Enterprise_E10_4",
+                "Enterprise_E100_4",
+                "Enterprise_E20_4",
+                "Enterprise_E50_4"
+            ],
+            "metadata": {
+                "description": "Select the SKU of the Redis cluster."
+            }
+        }, 
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+              "tag name 1": "value 1",
+              "tag name 2": "value 2"
+            }
+        },
+        "name": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Name of the Redis Cache."
+            }
+        },
+        "minimumTlsVersion": {
+            "type": "string",
+            "defaultValue": "1.2",
+            "allowedValues": [
+                "1.0",
+                "1.1",
+                "1.2"
+            ],
+            "metadata": {
+                "description": "Cluster Id for enterprise cluster."
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "redis_enterprise_name": "[parameters('name')]",
+        "zones": [1,2,3],
+        "sku_name": "[concat(split(parameters('SKU'), '_')[0], '_', split(parameters('SKU'), '_')[1])]",
+        "sku_capacity": "[split(parameters('SKU'), '_')[2]]",
+        "minimum_tls_version": "[parameters('minimumTlsVersion')]",
+        "location": "[resourceGroup().location]",
+        "scopeId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Cache/redisEnterprise/',variables('redis_enterprise_name'),'/databases/default')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Cache/redisEnterprise",
+            "apiVersion": "2020-10-01-preview",
+            "name": "[variables('redis_enterprise_name')]",
+            "location": "[variables('location')]",
+            "tags": "[parameters('resourceTags')]",
+            "sku": {
+              "capacity": "[variables('sku_capacity')]",
+              "name": "[variables('sku_name')]"
+            },
+            "properties": {
+              "minimumTlsVersion": "[variables('minimum_tls_version')]"
+            },
+            "zones": "[variables('zones')]"
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "Critical Alerts - Static",
+            "location": "global",
+            "properties": {
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                    "[variables('scopeId')]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 80,
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "usedmemorypercentage",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Maximum",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 10,
+                            "name": "Metric2",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cacheLatency",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 0,
+                            "name": "Metric3",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "evictedkeys",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Total",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 5000,
+                            "name": "Metric4",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "connectedclients",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Maximum",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "Cache Writes - Dynamic",
+            "location": "global",
+            "properties": {
+                "severity": 3,
+                "enabled": true,
+                "scopes": [
+                    "[variables('scopeId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "alertSensitivity": "Medium",
+                            "failingPeriods": {
+                                "numberOfEvaluationPeriods": 4,
+                                "minFailingPeriodsToAlert": 4
+                            },
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cacheWrite",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "DynamicThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "Cache Reads - Dynamic",
+            "location": "global",
+            "properties": {
+                "severity": 3,
+                "enabled": true,
+                "scopes": [
+                    "[variables('scopeId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "alertSensitivity": "Medium",
+                            "failingPeriods": {
+                                "numberOfEvaluationPeriods": 4,
+                                "minFailingPeriodsToAlert": 4
+                            },
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cacheRead",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "DynamicThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "Cache Misses - Dynamic",
+            "location": "global",
+            "properties": {
+                "severity": 3,
+                "enabled": true,
+                "scopes": [
+                    "[variables('scopeId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "alertSensitivity": "Medium",
+                            "failingPeriods": {
+                                "numberOfEvaluationPeriods": 4,
+                                "minFailingPeriodsToAlert": 4
+                            },
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cachemisses",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "DynamicThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        },
+         {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "Cache Hits - Dynamic",
+            "location": "global",
+            "properties": {
+                "severity": 3,
+                "enabled": true,
+                "scopes": [
+                    "[variables('scopeId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "alertSensitivity": "Medium",
+                            "failingPeriods": {
+                                "numberOfEvaluationPeriods": 4,
+                                "minFailingPeriodsToAlert": 4
+                            },
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cachehits",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "DynamicThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "Total Ops Dynamic",
+            "location": "global",
+            "properties": {
+                "severity": 3,
+                "enabled": true,
+                "scopes": [
+                    "[variables('scopeId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "alertSensitivity": "Medium",
+                            "failingPeriods": {
+                                "numberOfEvaluationPeriods": 4,
+                                "minFailingPeriodsToAlert": 4
+                            },
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "totalcommandsprocessed",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "DynamicThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        }
+    ],
+    "outputs": {
+
+    }
+}

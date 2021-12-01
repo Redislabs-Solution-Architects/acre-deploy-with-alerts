@@ -1,0 +1,53 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "metricAlerts_Cache_Reads___Dynamic_name": {
+            "defaultValue": "Cache Reads - Dynamic",
+            "type": "String"
+        },
+        "redisEnterprise_metrics_and_alerting_examples_externalid": {
+            "defaultValue": "/subscriptions/ef03f41d-d2bd-4691-b3a0-3aff1c6711f7/resourceGroups/metrics-and-alerting/providers/Microsoft.Cache/redisEnterprise/metrics-and-alerting-examples",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "[parameters('metricAlerts_Cache_Reads___Dynamic_name')]",
+            "location": "global",
+            "properties": {
+                "severity": 3,
+                "enabled": true,
+                "scopes": [
+                    "[parameters('redisEnterprise_metrics_and_alerting_examples_externalid')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "alertSensitivity": "Medium",
+                            "failingPeriods": {
+                                "numberOfEvaluationPeriods": 4,
+                                "minFailingPeriodsToAlert": 4
+                            },
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cacheRead",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "DynamicThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        }
+    ]
+}

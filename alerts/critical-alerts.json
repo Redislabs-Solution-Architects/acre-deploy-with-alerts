@@ -1,0 +1,76 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "metricAlerts_Critical_alerts___Redis_Enterprise_name": {
+            "defaultValue": "Critical alerts - Redis Enterprise",
+            "type": "String"
+        },
+        "redisEnterprise_metrics_and_alerting_examples_externalid": {
+            "defaultValue": "/subscriptions/ef03f41d-d2bd-4691-b3a0-3aff1c6711f7/resourceGroups/metrics-and-alerting/providers/Microsoft.Cache/redisEnterprise/metrics-and-alerting-examples",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "[parameters('metricAlerts_Critical_alerts___Redis_Enterprise_name')]",
+            "location": "global",
+            "properties": {
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                    "[parameters('redisEnterprise_metrics_and_alerting_examples_externalid')]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 80,
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "usedmemorypercentage",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Maximum",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 10,
+                            "name": "Metric2",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cacheLatency",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 0,
+                            "name": "Metric3",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "evictedkeys",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Total",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 5000,
+                            "name": "Metric4",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "connectedclients",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Maximum",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        }
+    ]
+}
