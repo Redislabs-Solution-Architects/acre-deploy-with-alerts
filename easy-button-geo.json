@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
@@ -294,4 +295,302 @@
     "outputs": {
 
     }
+=======
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "planAndCapacity": {
+      "type": "string",
+      "defaultValue": "Enterprise_E10_2",
+      "allowedValues": [
+        "Enterprise_E10_2",
+        "Enterprise_E10_4",
+        "Enterprise_E10_6",
+        "Enterprise_E10_8",
+        "Enterprise_E10_10",
+        "Enterprise_E20_2",
+        "Enterprise_E20_4",
+        "Enterprise_E20_6",
+        "Enterprise_E20_8",
+        "Enterprise_E20_10",
+        "Enterprise_E50_2",
+        "Enterprise_E50_4",
+        "Enterprise_E50_6",
+        "Enterprise_E50_8",
+        "Enterprise_E50_10",
+        "Enterprise_E100_2",
+        "Enterprise_E100_4",
+        "Enterprise_E100_6",
+        "Enterprise_E100_8",
+        "Enterprise_E100_10",
+        "EnterpriseFlash_F300_3",
+        "EnterpriseFlash_F300_9",
+        "EnterpriseFlash_F700_3",
+        "EnterpriseFlash_F700_9",
+        "EnterpriseFlash_F1500_3",
+        "EnterpriseFlash_F1500_9"
+      ],
+      "metadata": {
+        "description": "Select the SKU and scale of the Redis cluster."
+      }
+    },
+    "prefix": {
+      "type": "string",
+      "defaultValue": "redisgeek-",
+      "minLength": 3,
+      "maxLength": 11
+    },
+    "Region1": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "allowedValues": [
+        "australiaeast",
+        "canadacentral",
+        "centralindia",
+        "centralus",
+        "eastus",
+        "eastus2",
+        "northeurope",
+        "southcentralus",
+        "southeastasia",
+        "uksouth",
+        "westeurope",
+        "westus2"
+      ],
+      "metadata": {
+        "description": "Select region for geo-replication"
+      }
+    },
+    "Region2": {
+      "type": "string",
+      "defaultValue": "westus2",
+      "allowedValues": [
+        "australiaeast",
+        "canadacentral",
+        "centralindia",
+        "centralus",
+        "eastus",
+        "eastus2",
+        "northeurope",
+        "southcentralus",
+        "southeastasia",
+        "uksouth",
+        "westeurope",
+        "westus2"
+      ],
+      "metadata": {
+        "description": "Select another region for geo-replication"
+      }
+    },
+    "evictionPolicy": {
+      "type": "string",
+      "allowedValues": [
+        "AllKeysLFU",
+        "AllKeysLRU",
+        "AllKeysRandom",
+        "NoEviction",
+        "VolatileLFU",
+        "VolatileLRU",
+        "VolatileRandom",
+        "VolatileTTL"
+      ],
+      "defaultValue": "NoEviction",
+      "metadata": {
+        "description": "Eviction Policy"
+      }
+    },
+    "clientEncryption": {
+      "type": "string",
+      "allowedValues": [
+        "Encrypted",
+        "Plaintext"
+      ],
+      "defaultValue": "Encrypted",
+      "metadata": {
+        "description": "Client protocol"
+      }
+    },
+    "clusterPolicy": {
+      "type": "string",
+      "allowedValues": [
+        "EnterpriseCluster",
+        "OSSCluster"
+      ],
+      "defaultValue": "EnterpriseCluster",
+      "metadata": {
+        "description": "Clustering policy"
+      }
+    }
+  },
+  "variables": {
+    "geoReplicationGroupName": "[concat(parameters('prefix'),uniqueString(subscription().subscriptionId))]",
+    "acre_name_1": "[concat(parameters('prefix'),'1-',uniqueString(resourceGroup().id))]",
+    "acre_name_2": "[concat(parameters('prefix'),'2-',uniqueString(resourceGroup().id))]",
+    "sku_name": "[concat(split(parameters('planAndCapacity'), '_')[0], '_', split(parameters('planAndCapacity'), '_')[1])]",
+    "sku_capacity": "[split(parameters('planAndCapacity'), '_')[2]]"
+  },
+  "resources": [
+        {
+        "name": "[variables('acre_name_1')]",
+        "type": "Microsoft.Cache/redisEnterprise",
+        "apiVersion": "2021-02-01-preview",
+        "properties": {},
+        "location": "[parameters('Region1')]",
+        "dependsOn": [],
+        "sku": {
+            "name": "[variables('sku_name')]",
+            "capacity": "[variables('sku_capacity')]"
+        },
+        "zones": [
+            "1",
+            "2",
+            "3"
+        ],
+        "tags": {},
+        "resources": [
+            {
+            "name": "[concat(variables('acre_name_1'),'/default')]",
+            "type": "Microsoft.Cache/redisEnterprise/databases",
+            "apiVersion": "2021-02-01-preview",
+            "properties": {
+                "clientProtocol": "[parameters('clientEncryption')]",
+                "evictionPolicy": "[parameters('evictionPolicy')]",
+                "clusteringPolicy": "[parameters('clusterPolicy')]",
+                "geoReplication": {
+                "groupNickname": "[variables('geoReplicationGroupName')]",
+                "linkedDatabases": [
+                    {
+                    "id": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Cache/redisEnterprise/',variables('acre_name_1'),'/databases/default')]"
+                    }
+                ]
+                },
+                "persistence": {
+                "aofEnabled": "false",
+                "rdbEnabled": "false"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Cache/redisEnterprise/',variables('acre_name_1'))]"
+            ],
+            "tags": {}
+            }
+        ]
+        },
+        {
+        "name": "[variables('acre_name_2')]",
+        "type": "Microsoft.Cache/redisEnterprise",
+        "apiVersion": "2021-02-01-preview",
+        "properties": {},
+        "location": "[parameters('Region2')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Cache/redisEnterprise', variables('acre_name_1'))]"
+        ],
+        "sku": {
+            "name": "[variables('sku_name')]",
+            "capacity": "[variables('sku_capacity')]"
+        },
+        "zones": [
+            "1",
+            "2",
+            "3"
+        ],
+        "tags": {},
+        "resources": [
+            {
+            "name": "[concat(variables('acre_name_2'),'/default')]",
+            "type": "Microsoft.Cache/redisEnterprise/databases",
+            "apiVersion": "2021-02-01-preview",
+            "properties": {
+                "clientProtocol": "[parameters('clientEncryption')]",
+                "evictionPolicy": "[parameters('evictionPolicy')]",
+                "clusteringPolicy": "[parameters('clusterPolicy')]",
+                "geoReplication": {
+                "groupNickname": "[variables('geoReplicationGroupName')]",
+                "linkedDatabases": [
+                    {
+                    "id": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Cache/redisEnterprise/',variables('acre_name_1'),'/databases/default')]"
+                    },
+                    {
+                    "id": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Cache/redisEnterprise/',variables('acre_name_2'),'/databases/default')]"
+                    }
+                ]
+                },
+                "persistence": {
+                "aofEnabled": "false",
+                "rdbEnabled": "false"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Cache/redisEnterprise/',variables('acre_name_1'))]",
+                "[concat('Microsoft.Cache/redisEnterprise/',variables('acre_name_2'))]"
+            ],
+            "tags": {}
+            }
+        ]
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "Critical Alerts - Static",
+            "location": "global",
+            "properties": {
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                    "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Cache/redisEnterprise/',variables('acre_name_1'))]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 80,
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "usedmemorypercentage",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Maximum",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 10,
+                            "name": "Metric2",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "cacheLatency",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 0,
+                            "name": "Metric3",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "evictedkeys",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Total",
+                            "criterionType": "StaticThresholdCriterion"
+                        },
+                        {
+                            "threshold": 5000,
+                            "name": "Metric4",
+                            "metricNamespace": "Microsoft.Cache/redisEnterprise",
+                            "metricName": "connectedclients",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Maximum",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Cache/redisEnterprise",
+                "actions": []
+            }
+        },
+    ],
+    "outputs": {
+
+    }
+>>>>>>> 8e8d7f439f60b850e4d1b2beba141bf7ed13dfce
 }
