@@ -1,0 +1,86 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SKU": {
+            "type": "string",
+            "defaultValue": "Enterprise_E10_2",
+            "allowedValues": [
+                "Enterprise_E10_2",
+                "EnterpriseFlash_F1500_3",
+                "EnterpriseFlash_F300_3",
+                "EnterpriseFlash_F700_3",
+                "Enterprise_E10_2",
+                "Enterprise_E100_2",
+                "Enterprise_E20_2",
+                "Enterprise_E50_2",
+                "Enterprise_E10_4",
+                "EnterpriseFlash_F1500_6",
+                "EnterpriseFlash_F300_6",
+                "EnterpriseFlash_F700_6",
+                "Enterprise_E10_4",
+                "Enterprise_E100_4",
+                "Enterprise_E20_4",
+                "Enterprise_E50_4"
+            ],
+            "metadata": {
+                "description": "Select the SKU of the Redis cluster."
+            }
+        }, 
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+              "tag name 1": "value 1",
+              "tag name 2": "value 2"
+            }
+        },
+        "name": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Name of the Redis Cache."
+            }
+        },
+        "minimumTlsVersion": {
+            "type": "string",
+            "defaultValue": "1.2",
+            "allowedValues": [
+                "1.0",
+                "1.1",
+                "1.2"
+            ],
+            "metadata": {
+                "description": "Cluster Id for enterprise cluster."
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "redis_enterprise_name": "[parameters('name')]",
+        "zones": [1],
+        "sku_name": "[concat(split(parameters('SKU'), '_')[0], '_', split(parameters('SKU'), '_')[1])]",
+        "sku_capacity": "[split(parameters('SKU'), '_')[2]]",
+        "minimum_tls_version": "[parameters('minimumTlsVersion')]",
+        "location": "[resourceGroup().location]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Cache/redisEnterprise",
+            "apiVersion": "2020-10-01-preview",
+            "name": "[variables('redis_enterprise_name')]",
+            "location": "[variables('location')]",
+            "tags": "[parameters('resourceTags')]",
+            "sku": {
+              "capacity": "[variables('sku_capacity')]",
+              "name": "[variables('sku_name')]"
+            },
+            "properties": {
+              "minimumTlsVersion": "[variables('minimum_tls_version')]"
+            },
+            "zones": "[variables('zones')]"
+        }
+    ],
+    "outputs": {
+
+    }
+}
